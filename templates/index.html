@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            text-align: center;
+        }
+        .chat-container {
+            width: 40%;
+            margin: auto;
+            margin-top: 50px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            margin: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ddd;
+        }
+        #chat-box {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+        input {
+            width: 70%;
+            padding: 8px;
+            margin-right: 5px;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h2>Chatbot</h2>
+        <div id="chat-box"></div>
+        <input type="text" id="user-input" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+    
+    <script>
+        let teachMode = false;  // Flag to track Teach Mode
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("user-input").focus();
+        });
+
+        function sendMessage() {
+            let userInput = document.getElementById("user-input").value.trim();
+            if (userInput === "") return;
+
+            appendMessage("You", userInput);
+            document.getElementById("user-input").value = "";
+
+            if (userInput.toLowerCase() === "teach mode") {
+                askPassword();
+                return;
+            }
+
+            if (userInput.toLowerCase() === "exit teach mode") {
+                teachMode = false;
+                appendMessage("Chatbot", "Teach Mode exited.");
+                return;
+            }
+
+            if (teachMode) {
+                sendToTeach(userInput);
+                return;
+            }
+
+            fetch("/ask", {
+                method: "POST",
+                body: JSON.stringify({ question: userInput }),
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(response => response.json())
+            .then(data => {
+                appendMessage("Chatbot", data.answer);
+            });
+        }
+
+        function askPassword() {
+            let password = prompt("Enter password to access Teach Mode:");
+            if (password === "rohith") {
+                teachMode = true;
+                appendMessage("Chatbot", "Teach Mode activated. You can now add new knowledge.");
+            } else {
+                appendMessage("Chatbot", "Incorrect password. Access denied.");
+            }
+        }
+
+        function sendToTeach(newContext) {
+            fetch("/teach", {
+                method: "POST",
+                body: JSON.stringify({ context: newContext }),
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(response => response.json())
+            .then(data => {
+                appendMessage("Chatbot", data.message);
+            });
+        }
+
+        function appendMessage(sender, message) {
+            let chatBox = document.getElementById("chat-box");
+            let messageDiv = document.createElement("div");
+            messageDiv.innerHTML = `<strong>${sender}:</strong> ${message}`;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>

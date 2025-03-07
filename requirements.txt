@@ -1,0 +1,10 @@
+Flask
+Flask-CORS
+numpy
+tensorflow==2.17.0
+pandas
+scikit-learn
+joblib
+pickle-mixin
+Pillow
+gunicorn

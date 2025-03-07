@@ -87,7 +87,7 @@
                 return;
             }
 
-            fetch("/ask", {
+            fetch("https://ai-bot-1n7b.onrender.com/ask", {
                 method: "POST",
                 body: JSON.stringify({ question: userInput }),
                 headers: { "Content-Type": "application/json" }
@@ -109,7 +109,7 @@
         }
 
         function sendToTeach(newContext) {
-            fetch("/teach", {
+            fetch("https://ai-bot-1n7b.onrender.com/teach", {
                 method: "POST",
                 body: JSON.stringify({ context: newContext }),
                 headers: { "Content-Type": "application/json" }
